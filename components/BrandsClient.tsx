@@ -8,6 +8,7 @@ import { Input } from "./ui/input"
 export default function BrandsClient({ initialBrands }: { initialBrands: any[] }) {
   const [search, setSearch] = useState("")
   const [filter, setFilter] = useState("all") // all, available, out_of_stock
+  const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>({})
 
   const filteredBrands = useMemo(() => {
     return initialBrands.filter((brand) => {
@@ -123,20 +124,37 @@ export default function BrandsClient({ initialBrands }: { initialBrands: any[] }
                   
                   <div className="space-y-3">
                     <h3 className="text-xs uppercase tracking-widest text-primary/80 mb-2">Variants in stock</h3>
-                    {brand.variants.filter((v: any) => v.stockQuantity > 0).slice(0, 3).map((v: any) => (
-                      <div key={v._id} className="flex justify-between text-sm">
-                        <span className="text-gray-300">{v.name}</span>
-                        <span className="text-white font-medium">{v.stockQuantity}</span>
-                      </div>
-                    ))}
-                    {brand.variants.filter((v: any) => v.stockQuantity > 0).length > 3 && (
-                      <div className="text-xs text-muted-foreground italic pt-2">
-                        + {brand.variants.filter((v: any) => v.stockQuantity > 0).length - 3} more variants
-                      </div>
-                    )}
-                    {brand.variants.filter((v: any) => v.stockQuantity > 0).length === 0 && (
-                      <div className="text-sm text-muted-foreground">No variants currently available.</div>
-                    )}
+                    {(() => {
+                      const availableVariants = brand.variants.filter((v: any) => v.stockQuantity > 0);
+                      const isExpanded = expandedBrands[brand._id];
+                      const visibleVariants = isExpanded ? availableVariants : availableVariants.slice(0, 3);
+                      const hiddenCount = availableVariants.length - 3;
+
+                      return (
+                        <>
+                          {availableVariants.length === 0 ? (
+                            <div className="text-sm text-muted-foreground">No variants currently available.</div>
+                          ) : (
+                            <>
+                              {visibleVariants.map((v: any) => (
+                                <div key={v._id} className="flex justify-between text-sm">
+                                  <span className="text-gray-300">{v.name}</span>
+                                  <span className="text-white font-medium">{v.stockQuantity}</span>
+                                </div>
+                              ))}
+                              {hiddenCount > 0 && (
+                                <button
+                                  onClick={() => setExpandedBrands((prev) => ({ ...prev, [brand._id]: !prev[brand._id] }))}
+                                  className="text-xs text-primary hover:text-primary/80 transition-colors pt-2 underline decoration-dashed underline-offset-4"
+                                >
+                                  {isExpanded ? "Show less" : `+ ${hiddenCount} more variant${hiddenCount !== 1 ? 's' : ''}`}
+                                </button>
+                              )}
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
                   </div>
                 </div>
               </div>
