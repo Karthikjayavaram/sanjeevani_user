@@ -1,7 +1,6 @@
 import { Suspense } from "react"
 import { HeroSection } from "@/components/HomeClient"
 import BrandsClient from "@/components/BrandsClient"
-import SmoothScroll from "@/components/SmoothScroll"
 import connectToDatabase from "@/lib/db"
 import Brand from "@/models/Brand"
 
@@ -61,7 +60,7 @@ export default async function Home() {
   const totalBrands = brands.length;
 
   return (
-    <SmoothScroll>
+    <>
       <HeroSection />
       
       <section id="brands" className="py-32 bg-black relative z-10">
@@ -80,6 +79,6 @@ export default async function Home() {
           </Suspense>
         </div>
       </section>
-    </SmoothScroll>
+    </>
   )
 }

@@ -81,7 +81,7 @@ export default function WhyChooseUs() {
           {features.map((feature, index) => (
             <motion.div 
               key={index}
-              variants={itemVariants}
+              variants={itemVariants as any}
               className="glass-dark p-8 rounded-3xl hover:-translate-y-2 transition-transform duration-500 group relative overflow-hidden"
             >
               {/* Hover gradient effect */}
