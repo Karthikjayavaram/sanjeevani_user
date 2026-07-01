@@ -1,0 +1,135 @@
+@import "tailwindcss";
+
+@theme {
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+  
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
+  
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+  
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+  
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+  
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
+  
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+  
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
+  
+  --radius-lg: var(--radius);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-sm: calc(var(--radius) - 4px);
+}
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    
+    /* LIGHT MODE (Luxury Cream & Gold) */
+    --background: 45 30% 96%;
+    --foreground: 0 0% 10%;
+    
+    --card: 45 20% 98%;
+    --card-foreground: 0 0% 10%;
+    
+    --popover: 45 20% 98%;
+    --popover-foreground: 0 0% 10%;
+    
+    --primary: 43 74% 49%; /* Golden */
+    --primary-foreground: 0 0% 100%;
+    
+    --secondary: 0 0% 15%; /* Dark Charcoal */
+    --secondary-foreground: 0 0% 98%;
+    
+    --muted: 45 20% 90%;
+    --muted-foreground: 0 0% 40%;
+    
+    --accent: 45 30% 90%;
+    --accent-foreground: 0 0% 15%;
+    
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 98%;
+    
+    --border: 45 20% 85%;
+    --input: 45 20% 85%;
+    --ring: 43 74% 49%;
+  }
+
+  .dark {
+    /* DARK MODE (Deep Black & Golden Highlights) */
+    --background: 0 0% 4%; /* Deep black */
+    --foreground: 45 20% 96%; /* Cream text */
+    
+    --card: 0 0% 6%; /* Slight offset from black */
+    --card-foreground: 45 20% 96%;
+    
+    --popover: 0 0% 6%;
+    --popover-foreground: 45 20% 96%;
+    
+    --primary: 43 74% 49%; /* Golden */
+    --primary-foreground: 0 0% 10%;
+    
+    --secondary: 45 10% 15%; /* Darker charcoal/cream mix */
+    --secondary-foreground: 45 20% 96%;
+    
+    --muted: 0 0% 12%;
+    --muted-foreground: 45 10% 60%;
+    
+    --accent: 43 74% 49%;
+    --accent-foreground: 0 0% 10%;
+    
+    --destructive: 0 62% 30%;
+    --destructive-foreground: 45 20% 96%;
+    
+    --border: 0 0% 15%;
+    --input: 0 0% 15%;
+    --ring: 43 74% 49%;
+  }
+}
+
+@layer base {
+  * {
+    border-color: hsl(var(--border));
+  }
+  body {
+    background-color: hsl(var(--background));
+    color: hsl(var(--foreground));
+    overflow-x: hidden;
+  }
+}
+
+/* Glassmorphism utilities */
+@layer utilities {
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .glass-dark {
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.05);
+  }
+  
+  .text-gradient-gold {
+    background: linear-gradient(135deg, #FCE68A 0%, #D4AF37 50%, #B8860B 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+}
