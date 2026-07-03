@@ -13,7 +13,6 @@ if (!MONGODB_URI) {
 
 const VariantSchema = new mongoose.Schema({
   name: { type: String, required: true },
-  stockQuantity: { type: Number, required: true, default: 0 },
   isAvailable: { type: Boolean, default: true },
 });
 
@@ -51,8 +50,7 @@ function generateFakeBrands(count: number) {
     for (let v = 0; v < variantsCount; v++) {
       variants.push({
         name: variantNames[Math.floor(Math.random() * variantNames.length)],
-        stockQuantity: Math.floor(Math.random() * 500),
-        isAvailable: true
+        isAvailable: Math.random() > 0.2 // 80% chance of being available
       });
     }
 

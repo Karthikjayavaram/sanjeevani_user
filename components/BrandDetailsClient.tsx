@@ -45,14 +45,14 @@ export default function BrandDetailsClient({ variants }: { variants: any[] }) {
             className="grid grid-cols-3 p-4 items-center hover:bg-muted/20 transition-colors"
           >
             <div className="col-span-2 font-medium flex items-center gap-2">
-              <div className={`w-2 h-2 rounded-full ${variant.stockQuantity > 0 ? "bg-green-500" : "bg-red-500"}`} />
+              <div className={`w-2 h-2 rounded-full ${variant.isAvailable ? "bg-green-500" : "bg-red-500"}`} />
               {variant.name}
             </div>
             <div className="text-right">
-              {variant.stockQuantity > 0 ? (
-                <span className="font-bold text-foreground">{variant.stockQuantity}</span>
+              {variant.isAvailable ? (
+                <span className="font-bold text-foreground">Available</span>
               ) : (
-                <span className="text-muted-foreground text-sm">Out of Stock</span>
+                <span className="text-muted-foreground text-sm">Unavailable</span>
               )}
             </div>
           </motion.li>

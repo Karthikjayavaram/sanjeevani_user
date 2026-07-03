@@ -31,8 +31,8 @@ export default function RootLayout({
       <body className={`${outfit.variable} ${playfair.variable} font-sans antialiased min-h-screen flex flex-col bg-background text-foreground selection:bg-primary/30 selection:text-primary-foreground`}>
         <ThemeProvider
           attribute="class"
-          defaultTheme="system"
-          enableSystem
+          defaultTheme="dark"
+          forcedTheme="dark"
           disableTransitionOnChange
         >
           <SmoothScroll>

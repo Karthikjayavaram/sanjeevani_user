@@ -118,28 +118,34 @@ export default function BrandsClient({ initialBrands }: { initialBrands: any[] }
                   <h2 className="text-2xl font-playfair font-bold mb-3 text-white group-hover:text-primary transition-colors">{brand.name}</h2>
                   
                   <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/10">
-                    <span className="text-sm text-muted-foreground uppercase tracking-widest">Available</span>
-                    <span className="font-bold text-xl text-white">{brand.totalStock} <span className="text-sm font-normal text-muted-foreground">Bags</span></span>
+                    <span className="text-sm text-muted-foreground uppercase tracking-widest">Status</span>
+                    <span className={`font-bold text-lg ${brand.totalStock > 0 ? "text-green-400" : "text-red-400"}`}>
+                      {brand.totalStock > 0 ? "Available" : "Not Available"}
+                    </span>
                   </div>
                   
                   <div className="space-y-3">
-                    <h3 className="text-xs uppercase tracking-widest text-primary/80 mb-2">Variants in stock</h3>
+                    <h3 className="text-xs uppercase tracking-widest text-primary/80 mb-2">Variants</h3>
                     {(() => {
-                      const availableVariants = brand.variants.filter((v: any) => v.stockQuantity > 0);
+                      const allVariants = brand.variants;
                       const isExpanded = expandedBrands[brand._id];
-                      const visibleVariants = isExpanded ? availableVariants : availableVariants.slice(0, 3);
-                      const hiddenCount = availableVariants.length - 3;
+                      const visibleVariants = isExpanded ? allVariants : allVariants.slice(0, 3);
+                      const hiddenCount = allVariants.length - 3;
 
                       return (
                         <>
-                          {availableVariants.length === 0 ? (
-                            <div className="text-sm text-muted-foreground">No variants currently available.</div>
+                          {allVariants.length === 0 ? (
+                            <div className="text-sm text-muted-foreground">No variants added.</div>
                           ) : (
                             <>
                               {visibleVariants.map((v: any) => (
                                 <div key={v._id} className="flex justify-between text-sm">
                                   <span className="text-gray-300">{v.name}</span>
-                                  <span className="text-white font-medium">{v.stockQuantity}</span>
+                                  {v.isAvailable ? (
+                                    <span className="text-green-400 font-medium">Available</span>
+                                  ) : (
+                                    <span className="text-red-400 font-medium">Unavailable</span>
+                                  )}
                                 </div>
                               ))}
                               {hiddenCount > 0 && (

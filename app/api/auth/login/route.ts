@@ -8,20 +8,20 @@ const JWT_SECRET = process.env.JWT_SECRET || "fallback_secret_for_development";
 
 export async function POST(req: Request) {
   try {
-    const { username, password } = await req.json();
+    const { email, password } = await req.json();
 
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Username and password are required" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
     if (!process.env.MONGODB_URI) {
       // Mock login for preview mode
-      if (username === 'admin' && password === 'admin') {
+      if (email === 'admin@sanjeevani.com' && password === 'admin') {
         const token = jwt.sign(
-          { id: 'mock-admin-id', username: 'admin' },
+          { id: 'mock-admin-id', email: 'admin@sanjeevani.com' },
           JWT_SECRET,
           { expiresIn: "1d" }
         );
@@ -48,14 +48,16 @@ export async function POST(req: Request) {
 
     await connectToDatabase();
 
-    if (!username || !password) {
+    if (!email || !password) {
       return NextResponse.json(
-        { error: "Username and password are required" },
+        { error: "Email and password are required" },
         { status: 400 }
       );
     }
 
-    const admin = await Admin.findOne({ username });
+    const admin = await Admin.findOne({ 
+      $or: [{ username: email }, { email: email }] 
+    });
 
     if (!admin) {
       return NextResponse.json(
@@ -75,7 +77,7 @@ export async function POST(req: Request) {
 
     // Create token
     const token = jwt.sign(
-      { id: admin._id, username: admin.username },
+      { id: admin._id, email: admin.email },
       JWT_SECRET,
       { expiresIn: "1d" }
     );

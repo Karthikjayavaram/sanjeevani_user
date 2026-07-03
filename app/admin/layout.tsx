@@ -58,13 +58,9 @@ export default function AdminLayout({
         </div>
         
         <nav className="flex-1 p-6 space-y-2 relative z-10">
-          <Link href="/admin/dashboard" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white">
-            <LayoutDashboard className="h-5 w-5 text-primary" />
-            <span className="font-medium">Dashboard</span>
-          </Link>
           <Link href="/admin/brands" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white">
             <Package className="h-5 w-5 text-primary" />
-            <span className="font-medium">Inventory</span>
+            <span className="font-medium">Edit Stock</span>
           </Link>
           <Link href="/admin/brands/new" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white">
             <Settings className="h-5 w-5 text-primary" />

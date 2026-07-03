@@ -15,8 +15,8 @@ async function getBrands() {
         name: "Royal Basmati Premium",
         description: "High quality long grain basmati rice.",
         imageUrl: "https://placehold.co/400x500?text=Basmati+Rice",
-        variants: [{ _id: "v1", name: "25kg", stockQuantity: 50 }, { _id: "v3", name: "10kg", stockQuantity: 120 }],
-        totalStock: 170,
+        variants: [{ _id: "v1", name: "25kg", isAvailable: true }, { _id: "v3", name: "10kg", isAvailable: true }],
+        totalStock: 2,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
@@ -25,7 +25,7 @@ async function getBrands() {
         name: "Sona Masoori",
         description: "Light and aromatic short grain rice.",
         imageUrl: "https://placehold.co/400x500?text=Sona+Masoori",
-        variants: [{ _id: "v2", name: "10kg", stockQuantity: 0 }],
+        variants: [{ _id: "v2", name: "10kg", isAvailable: false }],
         totalStock: 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
@@ -42,7 +42,7 @@ async function getBrands() {
       _id: brand._id.toString(),
       createdAt: brand.createdAt.toISOString(),
       updatedAt: brand.updatedAt.toISOString(),
-      totalStock: (brand.variants || []).reduce((sum: number, v: any) => sum + (v.stockQuantity || 0), 0),
+      totalStock: (brand.variants || []).filter((v: any) => v.isAvailable).length,
       variants: (brand.variants || []).map((v: any) => ({
         ...v,
         _id: v._id.toString()

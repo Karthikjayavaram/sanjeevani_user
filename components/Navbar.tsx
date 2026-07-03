@@ -4,16 +4,12 @@ import * as React from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { motion } from "framer-motion"
-import { Wheat, Menu, X, Sun, Moon } from "lucide-react"
-import { useTheme } from "next-themes"
+import { Wheat, Menu, X } from "lucide-react"
 import { Button } from "./ui/button"
 
 export function Navbar() {
   const [isOpen, setIsOpen] = React.useState(false)
   const pathname = usePathname()
-  const { theme, setTheme } = useTheme()
-
-
   // Do not show navbar on admin pages
   if (pathname.startsWith('/admin')) {
     return null;
@@ -38,30 +34,10 @@ export function Navbar() {
           <Link href="/admin/login" className="text-sm font-medium hover:text-primary transition-colors">
             Admin
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
         </nav>
 
         {/* Mobile Navigation Toggle */}
         <div className="flex items-center md:hidden gap-2">
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-            className="rounded-full"
-          >
-            <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-            <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-            <span className="sr-only">Toggle theme</span>
-          </Button>
           <Button variant="ghost" size="icon" onClick={() => setIsOpen(!isOpen)}>
             {isOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
           </Button>

@@ -2,7 +2,6 @@ import mongoose, { Schema, Document } from "mongoose";
 
 export interface IVariant {
   name: string;
-  stockQuantity: number;
   isAvailable: boolean;
 }
 
@@ -18,7 +17,6 @@ export interface IBrand extends Document {
 
 const VariantSchema = new Schema<IVariant>({
   name: { type: String, required: true },
-  stockQuantity: { type: Number, required: true, default: 0 },
   isAvailable: { type: Boolean, default: true },
 });
 
@@ -34,9 +32,9 @@ const BrandSchema = new Schema<IBrand>(
   }
 );
 
-// Virtual for calculating total stock across all variants
+// Virtual for calculating total stock across all variants (count of available variants)
 BrandSchema.virtual('totalStock').get(function(this: IBrand) {
-  return this.variants.reduce((total, variant) => total + variant.stockQuantity, 0);
+  return this.variants.filter(variant => variant.isAvailable).length;
 });
 
 // Ensure virtuals are included in toJSON/toObject

@@ -1,11 +1,13 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Trash2, Loader2, ArrowLeft } from "lucide-react"
+import { Plus, Trash2, Loader2, ArrowLeft, RotateCw } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
+import Cropper, { ReactCropperElement } from "react-cropper"
+import "cropperjs/dist/cropper.css"
 
 const DEFAULT_VARIANTS = [
   "5 kg with Handle",
@@ -30,57 +32,101 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
   const [description, setDescription] = useState(initialData?.description || "")
   const [uploadingImage, setUploadingImage] = useState(false)
 
-  const handleImageFile = async (file: File) => {
+  // Cropper states
+  const [imageSrc, setImageSrc] = useState<string | null>(null)
+  const cropperRef = useRef<ReactCropperElement>(null)
+
+  const handleImageFile = (file: File) => {
     if (!file) return;
     if (!file.type.startsWith('image/')) {
       setError("Please select an image file")
       return;
     }
     
-    setUploadingImage(true)
-    setError("")
-    
-    try {
-      const formData = new FormData()
-      formData.append("file", file)
-      
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData
-      })
-      
-      if (res.ok) {
-        const data = await res.json()
-        setImageUrl(data.url)
-      } else {
-        const errData = await res.json()
-        setError(errData.error || "Failed to upload image")
+    const reader = new FileReader();
+    reader.onload = () => {
+      setImageSrc(reader.result as string);
+    };
+    reader.readAsDataURL(file);
+  }
+
+  const handleUploadCrop = async () => {
+    if (typeof cropperRef.current?.cropper !== "undefined") {
+      setUploadingImage(true);
+      setError("");
+      try {
+        const canvas = cropperRef.current?.cropper.getCroppedCanvas();
+        if (!canvas) {
+          setError("Failed to crop image");
+          setUploadingImage(false);
+          return;
+        }
+        
+        canvas.toBlob(async (blob) => {
+          if (!blob) {
+            setError("Failed to create image blob");
+            setUploadingImage(false);
+            return;
+          }
+          
+          const formData = new FormData();
+          formData.append("file", blob, "cropped.jpg");
+          
+          const res = await fetch("/api/upload", {
+            method: "POST",
+            body: formData
+          });
+          
+          if (res.ok) {
+            const data = await res.json();
+            setImageUrl(data.url);
+            setImageSrc(null);
+          } else {
+            const errData = await res.json();
+            setError(errData.error || "Failed to upload image");
+          }
+          setUploadingImage(false);
+        }, "image/jpeg", 0.9);
+      } catch (err) {
+        setError("Error uploading image");
+        setUploadingImage(false);
       }
-    } catch (err) {
-      setError("Error uploading image")
-    } finally {
-      setUploadingImage(false)
     }
   }
 
-  const handlePaste = (e: React.ClipboardEvent) => {
-    const items = e.clipboardData?.items
-    if (!items) return
-    
-    for (let i = 0; i < items.length; i++) {
-      if (items[i].type.indexOf('image') !== -1) {
-        const file = items[i].getAsFile()
-        if (file) {
-          e.preventDefault()
-          handleImageFile(file)
-          break
+  const cancelCrop = () => {
+    setImageSrc(null);
+  }
+
+  useEffect(() => {
+    const handleGlobalPaste = (e: ClipboardEvent) => {
+      // Don't intercept if they are typing in an input/textarea
+      if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) {
+        return;
+      }
+      
+      const items = e.clipboardData?.items;
+      if (!items) return;
+      
+      for (let i = 0; i < items.length; i++) {
+        if (items[i].type.indexOf('image') !== -1) {
+          const file = items[i].getAsFile();
+          if (file) {
+            e.preventDefault();
+            handleImageFile(file);
+            break;
+          }
         }
       }
-    }
-  }
+    };
+
+    window.addEventListener('paste', handleGlobalPaste);
+    return () => window.removeEventListener('paste', handleGlobalPaste);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
   
   const [variants, setVariants] = useState<any[]>(
-    initialData?.variants || DEFAULT_VARIANTS.map(v => ({ name: v, stockQuantity: 0, isAvailable: true }))
+    initialData?.variants || DEFAULT_VARIANTS.map(v => ({ name: v, isAvailable: true }))
   )
 
   const handleVariantChange = (index: number, field: string, value: any) => {
@@ -90,7 +136,7 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
   }
 
   const addVariant = () => {
-    setVariants([...variants, { name: "", stockQuantity: 0, isAvailable: true }])
+    setVariants([...variants, { name: "", isAvailable: true }])
   }
 
   const removeVariant = (index: number) => {
@@ -133,6 +179,48 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
     }
   }
 
+  if (imageSrc) {
+    return (
+      <div className="max-w-4xl mx-auto pt-8">
+        <div className="glass rounded-2xl p-6 md:p-8 space-y-6">
+          <h2 className="text-xl font-bold border-b pb-4">Crop & Rotate Image</h2>
+          {error && (
+            <div className="bg-destructive/15 text-destructive text-sm p-4 rounded-md border border-destructive/20">
+              {error}
+            </div>
+          )}
+          <div className="w-full bg-black/50 rounded-lg overflow-hidden border border-white/10">
+            <Cropper
+              src={imageSrc}
+              style={{ height: 400, width: "100%" }}
+              initialAspectRatio={NaN}
+              guides={true}
+              autoCropArea={1}
+              viewMode={1}
+              dragMode="move"
+              ref={cropperRef}
+              background={false}
+            />
+          </div>
+          <div className="flex justify-between gap-4">
+            <Button type="button" variant="outline" onClick={() => cropperRef.current?.cropper.rotate(90)}>
+              <RotateCw className="mr-2 h-4 w-4" /> Rotate 90°
+            </Button>
+            <div className="flex gap-2">
+              <Button type="button" variant="ghost" onClick={cancelCrop} disabled={uploadingImage}>
+                Cancel
+              </Button>
+              <Button type="button" onClick={handleUploadCrop} disabled={uploadingImage}>
+                {uploadingImage ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                Upload Cropped Image
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="max-w-4xl mx-auto">
       <div className="mb-6">
@@ -168,16 +256,10 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
               />
             </div>
             
-            <div className="space-y-2" onPaste={handlePaste}>
-              <label className="text-sm font-medium">Image (URL, File, or Paste)</label>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Brand Image</label>
               <div className="flex gap-2">
-                <Input 
-                  value={imageUrl}
-                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setImageUrl(e.target.value)}
-                  placeholder="Paste image, URL, or select file..."
-                  className="flex-1"
-                />
-                <div className="relative flex items-center justify-center">
+                <div className="relative flex items-center justify-center w-full">
                   <Input 
                     type="file" 
                     accept="image/*"
@@ -186,15 +268,27 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
                       if (e.target.files?.[0]) handleImageFile(e.target.files[0])
                     }}
                   />
-                  <Button type="button" variant="outline" disabled={uploadingImage} className="pointer-events-none">
-                    {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin" /> : "Upload"}
+                  <Button type="button" variant="outline" disabled={uploadingImage} className="w-full pointer-events-none h-10 bg-muted/10 border-dashed hover:bg-muted/30">
+                    {uploadingImage ? <Loader2 className="h-4 w-4 animate-spin mr-2" /> : <Plus className="h-4 w-4 mr-2" />}
+                    {uploadingImage ? "Uploading..." : "Click to Upload Image"}
                   </Button>
                 </div>
               </div>
               {imageUrl && (
-                <div className="mt-2 h-32 w-32 relative rounded-md overflow-hidden border border-border bg-muted/20">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={imageUrl} alt="Preview" className="object-cover w-full h-full" />
+                <div className="mt-4 flex items-center gap-4">
+                  <div className="h-32 w-32 rounded-md overflow-hidden border border-border bg-muted/20 shrink-0">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={imageUrl} alt="Preview" className="object-cover w-full h-full" />
+                  </div>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => setImageSrc(imageUrl)}
+                    className="shrink-0"
+                  >
+                    Crop & Edit
+                  </Button>
                 </div>
               )}
             </div>
@@ -231,15 +325,16 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
                     placeholder="e.g. 5 kg with Handle"
                   />
                 </div>
-                <div className="w-full md:w-32 space-y-1">
-                  <label className="text-xs text-muted-foreground">Stock Quantity</label>
-                  <Input 
-                    type="number"
-                    min="0"
-                    required
-                    value={variant.stockQuantity}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleVariantChange(index, "stockQuantity", parseInt(e.target.value) || 0)}
-                  />
+                <div className="w-full md:w-40 space-y-1">
+                  <label className="text-xs text-muted-foreground">Status</label>
+                  <select
+                    className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+                    value={variant.isAvailable ? "available" : "unavailable"}
+                    onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleVariantChange(index, "isAvailable", e.target.value === "available")}
+                  >
+                    <option value="available" className="bg-background text-foreground">Available</option>
+                    <option value="unavailable" className="bg-background text-foreground">Unavailable</option>
+                  </select>
                 </div>
                 <div className="pt-5 flex justify-end w-full md:w-auto">
                   <Button 

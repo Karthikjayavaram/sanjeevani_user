@@ -20,7 +20,7 @@ export function middleware(request: NextRequest) {
 
   // Redirect authenticated admin away from login page
   if (request.nextUrl.pathname.startsWith('/admin/login') && token) {
-    return NextResponse.redirect(new URL('/admin/dashboard', request.url));
+    return NextResponse.redirect(new URL('/admin/brands', request.url));
   }
 
   return NextResponse.next();
