@@ -16,7 +16,7 @@ export function Footer() {
           
           {/* Brand & Godown Details */}
           <div className="space-y-4">
-            <h3 className="text-2xl font-playfair font-bold text-gradient-gold">Sanjeevani Veeresh</h3>
+            <h3 className="text-2xl font-playfair font-bold text-gradient-gold">Sanjeevini Veeresh</h3>
             <p className="text-muted-foreground text-sm leading-relaxed max-w-sm">
               Premium Rice Godown offering the finest quality rice brands with reliable stock availability.
             </p>
@@ -25,7 +25,7 @@ export function Footer() {
                 <span className="text-primary font-medium">Location:</span> Siruguppa, Karnataka, India
               </p>
               <p className="flex items-center gap-2">
-                <span className="text-primary font-medium">Contact:</span> +91 74833 37777
+                {/* Phone number removed */}
               </p>
             </div>
           </div>
@@ -49,7 +49,7 @@ export function Footer() {
             <div className="pt-2 space-y-2 text-sm text-foreground/80 lg:flex lg:flex-col lg:items-end">
               <p className="font-medium text-primary text-base">Karthik Jayavaram</p>
               <p className="flex items-center gap-2 lg:justify-end">
-                <span className="text-muted-foreground">Ph:</span> +91 63010 15578
+                {/* Phone number removed */}
               </p>
               <p className="flex items-center gap-2 lg:justify-end">
                 <span className="text-muted-foreground">Email:</span> karthik.jayavaram@gmail.com
@@ -60,7 +60,7 @@ export function Footer() {
 
         <div className="mt-12 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
           <p className="text-xs text-muted-foreground text-center md:text-left">
-            &copy; {new Date().getFullYear()} Sanjeevani Veeresh Rice Godown. All rights reserved.
+            &copy; {new Date().getFullYear()} Sanjeevini Veeresh Rice Godown. All rights reserved.
           </p>
           <p className="text-xs text-muted-foreground text-center md:text-right">
             Designed & Developed by <span className="text-primary font-medium">Karthik Jayavaram</span>

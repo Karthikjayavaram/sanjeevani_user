@@ -20,7 +20,7 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4 md:px-8">
         <Link href="/" className="flex items-center gap-2">
           <Wheat className="h-6 w-6 text-yellow-600 dark:text-yellow-400" />
-          <span className="font-bold tracking-tight text-xl">Sanjeevani</span>
+          <span className="font-bold tracking-tight text-xl">Sanjeevini</span>
         </Link>
 
         {/* Desktop Navigation */}

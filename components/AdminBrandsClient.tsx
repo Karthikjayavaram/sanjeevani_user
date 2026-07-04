@@ -4,20 +4,24 @@ import { useState } from "react"
 import { useRouter } from "next/navigation"
 import Link from "next/link"
 import { Plus, Edit, Trash2, Search, Loader2 } from "lucide-react"
+import VariantChips from '@/components/VariantChips'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
 export default function AdminBrandsClient({ initialBrands }: { initialBrands: any[] }) {
   const [brands, setBrands] = useState(initialBrands)
-  const [search, setSearch] = useState("")
+  const [search, setSearch] = useState("");
+  const [selectedVariant, setSelectedVariant] = useState<string>("");
   const [deletingId, setDeletingId] = useState<string | null>(null)
   const [confirmDeleteId, setConfirmDeleteId] = useState<string | null>(null)
   const [error, setError] = useState("")
   const router = useRouter()
 
-  const filteredBrands = brands.filter((brand) =>
-    brand.name.toLowerCase().includes(search.toLowerCase())
-  )
+  const filteredBrands = brands.filter((brand) => {
+    const matchesSearch = brand.name.toLowerCase().includes(search.toLowerCase());
+    const matchesVariant = selectedVariant === "" || brand.variants.some((v: any) => v.name?.toLowerCase() === selectedVariant.toLowerCase());
+    return matchesSearch && matchesVariant;
+  });
 
   const handleDelete = async (id: string) => {
     setDeletingId(id)
@@ -94,6 +98,13 @@ export default function AdminBrandsClient({ initialBrands }: { initialBrands: an
           onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
         />
       </div>
+        {/* Variant Chips Filter */}
+        <div className="mb-6 max-w-xs">
+          <VariantChips
+            options={['All Variants', ...Array.from(new Set(brands.flatMap(b => b.variants.map((v: any) => v.name).filter(Boolean))))]}
+            onSelect={(value) => setSelectedVariant(value === 'All Variants' ? '' : value)}
+          />
+        </div>
 
       <div className="glass rounded-xl overflow-hidden">
         <div className="overflow-x-auto">

@@ -96,7 +96,7 @@ export function HeroSection() {
           transition={{ duration: 1.2, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
           className="font-playfair text-6xl md:text-8xl lg:text-9xl font-black tracking-tight mb-4 text-gradient-gold drop-shadow-2xl"
         >
-          Sanjeevani
+          Sanjeevini
           <br />
           Veeresh
         </motion.h1>

@@ -17,8 +17,8 @@ const outfit = Outfit({
 });
 
 export const metadata: Metadata = {
-  title: "Sanjeevani | Premium Rice Godown",
-  description: "Check available premium rice brands and stock at Sanjeevani Rice Godown.",
+  title: "Sanjeevini | Premium Rice Godown",
+  description: "Check available premium rice brands and stock at Sanjeevini Rice Godown.",
 };
 
 export default function RootLayout({

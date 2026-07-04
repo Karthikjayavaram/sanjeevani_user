@@ -37,7 +37,7 @@ export default function AdminLayout({
     <div className="min-h-screen flex flex-col md:flex-row bg-[#050505]">
       {/* Mobile Top Bar */}
       <div className="md:hidden flex items-center justify-between p-4 bg-black border-b border-white/10 z-50">
-        <h2 className="text-xl font-playfair font-black text-gradient-gold">Sanjeevani Admin</h2>
+        <h2 className="text-xl font-playfair font-black text-gradient-gold">Sanjeevini Admin</h2>
         <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}>
           {isMobileMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
         </Button>
@@ -53,7 +53,7 @@ export default function AdminLayout({
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-[60px] pointer-events-none" />
         
         <div className="p-8 border-b border-white/5 relative z-10 hidden md:block">
-          <h2 className="text-2xl font-playfair font-black text-gradient-gold">Sanjeevani</h2>
+          <h2 className="text-2xl font-playfair font-black text-gradient-gold">Sanjeevini</h2>
           <p className="text-xs text-muted-foreground uppercase tracking-widest mt-1">Admin Portal</p>
         </div>
         

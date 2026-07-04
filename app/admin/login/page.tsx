@@ -132,7 +132,7 @@ export default function AdminLogin() {
             <Wheat className="h-10 w-10 text-primary relative z-10 drop-shadow-[0_0_10px_rgba(212,175,55,0.5)]" />
           </div>
           <h1 className="text-4xl font-playfair font-black text-gradient-gold tracking-wider">
-            {mode === "login" && "Sanjeevani"}
+            {mode === "login" && "Sanjeevini"}
             {mode === "forgot_password" && "Reset Access"}
             {mode === "reset_password" && "New Password"}
           </h1>

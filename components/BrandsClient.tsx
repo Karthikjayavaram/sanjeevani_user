@@ -4,23 +4,29 @@ import { useState, useMemo } from "react"
 import { motion } from "framer-motion"
 import { Search } from "lucide-react"
 import { Input } from "./ui/input"
+import VariantChips from "@/components/VariantChips"
 
 export default function BrandsClient({ initialBrands }: { initialBrands: any[] }) {
   const [search, setSearch] = useState("")
-  const [filter, setFilter] = useState("all") // all, available, out_of_stock
-  const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>({})
+  const [selectedVariant, setSelectedVariant] = useState<string>("")
+  const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>({});
+
+  // Helper to normalize strings for comparison (ignore case & spaces)
+  const normalize = (str: string) => str.replace(/\s+/g, "").toLowerCase();
 
   const filteredBrands = useMemo(() => {
     return initialBrands.filter((brand) => {
       const matchesSearch = brand.name.toLowerCase().includes(search.toLowerCase())
-      if (!matchesSearch) return false
-      
-      if (filter === "available") return brand.totalStock > 0
-      if (filter === "out_of_stock") return brand.totalStock === 0
-      
-      return true
-    })
-  }, [initialBrands, search, filter])
+      if (!matchesSearch) return false;
+
+      if (selectedVariant) {
+        // Compare normalized variant names
+        return brand.variants.some((v: any) => normalize(v.name) === normalize(selectedVariant));
+      }
+
+      return true;
+    });
+  }, [initialBrands, search, selectedVariant]);
 
   const container = {
     hidden: { opacity: 0 },
@@ -53,19 +59,23 @@ export default function BrandsClient({ initialBrands }: { initialBrands: any[] }
             className="pl-12 h-14 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground rounded-full focus-visible:ring-primary/50 transition-all shadow-inner"
           />
         </div>
-        <div className="flex gap-2 p-1 bg-white/5 rounded-full border border-white/10">
-          <button 
-            onClick={() => setFilter("all")}
-            className={`px-6 py-3 rounded-full text-sm font-medium transition-colors ${filter === "all" ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-white/10 text-muted-foreground"}`}
-          >
-            All
-          </button>
-          <button 
-            onClick={() => setFilter("available")}
-            className={`px-6 py-3 rounded-full text-sm font-medium transition-colors ${filter === "available" ? "bg-primary text-primary-foreground shadow-md" : "hover:bg-white/10 text-muted-foreground"}`}
-          >
-            Available
-          </button>
+        <div className="mb-6 max-w-xs">
+          <VariantChips
+            options={[
+              "All Variants",
+              "5 kg with handle",
+              "5 kg without handle",
+              "10 kg with handle",
+              "10 kg without handle",
+              "26 kg 2 side box",
+              "26 kg 1 side",
+              "30 kg 2 side box",
+              "26 kg Fiber non woven bags",
+              "26 kg 3D metallic bags",
+              "50 kg bags"
+            ]}
+            onSelect={(value) => setSelectedVariant(value === "All Variants" ? "" : value)}
+          />
         </div>
       </motion.div>
 
