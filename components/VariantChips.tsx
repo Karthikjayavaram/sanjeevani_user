@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import styles from './VariantChips.module.css';
 
 interface VariantChipsProps {
   options: string[];
@@ -15,31 +16,18 @@ export default function VariantChips({ options, onSelect }: VariantChipsProps) {
     if (onSelect) onSelect(value);
   };
 
-  const chipStyle: React.CSSProperties = {
-    border: '1px solid #d4af37',
-    borderRadius: '9999px',
-    padding: '4px 12px',
-    margin: '4px',
-    cursor: 'pointer',
-    fontSize: '0.875rem',
-    color: '#d4af37',
-    background: 'transparent',
-    transition: 'all 0.2s ease-in-out',
-  };
-
-  const selectedStyle: React.CSSProperties = {
-    ...chipStyle,
-    background: 'linear-gradient(135deg, #d4af37, #b8860b)',
-    color: '#050505',
-  };
-
   return (
-    <div style={{ display: 'flex', flexWrap: 'wrap', marginTop: '8px' }}>
+    <div className={styles.container}>
       {options.map((opt) => (
-        <div key={opt} style={selected === opt ? selectedStyle : chipStyle} onClick={() => handleClick(opt)}>
+        <div
+          key={opt}
+          className={`${styles.chip} ${selected === opt ? styles.chipSelected : ''}`}
+          onClick={() => handleClick(opt)}
+        >
           {opt}
         </div>
       ))}
     </div>
   );
 }
+

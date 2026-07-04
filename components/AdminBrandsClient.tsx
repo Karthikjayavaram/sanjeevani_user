@@ -17,9 +17,12 @@ export default function AdminBrandsClient({ initialBrands }: { initialBrands: an
   const [error, setError] = useState("")
   const router = useRouter()
 
+  // Helper to normalize strings (ignore case & spaces)
+  const normalize = (str: string) => str.replace(/\s+/g, "").toLowerCase();
+
   const filteredBrands = brands.filter((brand) => {
     const matchesSearch = brand.name.toLowerCase().includes(search.toLowerCase());
-    const matchesVariant = selectedVariant === "" || brand.variants.some((v: any) => v.name?.toLowerCase() === selectedVariant.toLowerCase());
+    const matchesVariant = selectedVariant === "" || brand.variants.some((v: any) => normalize(v.name) === normalize(selectedVariant));
     return matchesSearch && matchesVariant;
   });
 
@@ -99,9 +102,9 @@ export default function AdminBrandsClient({ initialBrands }: { initialBrands: an
         />
       </div>
         {/* Variant Chips Filter */}
-        <div className="mb-6 max-w-xs">
+        <div className="mb-6 w-full">
           <VariantChips
-            options={['All Variants', ...Array.from(new Set(brands.flatMap(b => b.variants.map((v: any) => v.name).filter(Boolean))))]}
+            options={['All Variants', ...Array.from(new Set(brands.flatMap(b => b.variants.map((v: any) => v.name?.trim()).filter(Boolean))))]}
             onSelect={(value) => setSelectedVariant(value === 'All Variants' ? '' : value)}
           />
         </div>
