@@ -8,7 +8,7 @@ import VariantChips from '@/components/VariantChips'
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 
-export default function AdminBrandsClient({ initialBrands }: { initialBrands: any[] }) {
+export default function AdminBrandsClient({ initialBrands, initialVariants }: { initialBrands: any[], initialVariants: string[] }) {
   const [brands, setBrands] = useState(initialBrands)
   const [search, setSearch] = useState("");
   const [selectedVariant, setSelectedVariant] = useState<string>("");
@@ -85,11 +85,7 @@ export default function AdminBrandsClient({ initialBrands }: { initialBrands: an
 
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
         <h1 className="text-3xl font-bold">Manage Brands</h1>
-        <Button asChild>
-          <Link href="/admin/brands/new">
-            <Plus className="mr-2 h-4 w-4" /> Add New Brand
-          </Link>
-        </Button>
+
       </div>
 
       <div className="mb-6 relative max-w-md">
@@ -104,7 +100,12 @@ export default function AdminBrandsClient({ initialBrands }: { initialBrands: an
         {/* Variant Chips Filter */}
         <div className="mb-6 w-full">
           <VariantChips
-            options={['All Variants', ...Array.from(new Set(brands.flatMap(b => b.variants.map((v: any) => v.name?.trim()).filter(Boolean))))]}
+            options={[
+              "All Variants",
+              ...initialVariants,
+              ...Array.from(new Set(brands.flatMap(b => b.variants.map((v: any) => v.name?.trim()).filter(Boolean))))
+                .filter(v => !initialVariants.some((dv: string) => dv.toLowerCase() === v.toLowerCase()))
+            ]}
             onSelect={(value) => setSelectedVariant(value === 'All Variants' ? '' : value)}
           />
         </div>

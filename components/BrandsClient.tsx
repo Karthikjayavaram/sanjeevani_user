@@ -6,7 +6,7 @@ import { Search } from "lucide-react"
 import { Input } from "./ui/input"
 import VariantChips from "@/components/VariantChips"
 
-export default function BrandsClient({ initialBrands }: { initialBrands: any[] }) {
+export default function BrandsClient({ initialBrands, initialVariants }: { initialBrands: any[], initialVariants: string[] }) {
   const [search, setSearch] = useState("")
   const [selectedVariant, setSelectedVariant] = useState<string>("")
   const [expandedBrands, setExpandedBrands] = useState<Record<string, boolean>>({});
@@ -46,10 +46,10 @@ export default function BrandsClient({ initialBrands }: { initialBrands: any[] }
   return (
     <div>
       <motion.div 
-        className="flex flex-col sm:flex-row gap-4 max-w-2xl mx-auto mb-16"
+        className="flex flex-col gap-6 max-w-4xl mx-auto mb-16"
         variants={item}
       >
-        <div className="relative flex-1">
+        <div className="relative w-full max-w-2xl mx-auto">
           <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
           <Input 
             type="text" 
@@ -59,20 +59,13 @@ export default function BrandsClient({ initialBrands }: { initialBrands: any[] }
             className="pl-12 h-14 bg-white/5 border-white/10 text-white placeholder:text-muted-foreground rounded-full focus-visible:ring-primary/50 transition-all shadow-inner"
           />
         </div>
-        <div className="mb-6 max-w-xs">
+        <div className="w-full flex justify-center">
           <VariantChips
             options={[
               "All Variants",
-              "5 kg with handle",
-              "5 kg without handle",
-              "10 kg with handle",
-              "10 kg without handle",
-              "26 kg 2 side box",
-              "26 kg 1 side",
-              "30 kg 2 side box",
-              "26 kg Fiber non woven bags",
-              "26 kg 3D metallic bags",
-              "50 kg bags"
+              ...initialVariants,
+              ...Array.from(new Set(initialBrands.flatMap(b => b.variants.map((v: any) => v.name?.trim()).filter(Boolean))))
+                .filter(v => !initialVariants.some((dv: string) => dv.toLowerCase() === v.toLowerCase()))
             ]}
             onSelect={(value) => setSelectedVariant(value === "All Variants" ? "" : value)}
           />

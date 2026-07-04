@@ -2,25 +2,87 @@
 
 import { useState, useRef, useEffect } from "react"
 import { useRouter } from "next/navigation"
-import { Plus, Trash2, Loader2, ArrowLeft, RotateCw } from "lucide-react"
+import { Plus, Trash2, Loader2, ArrowLeft, RotateCw, ChevronDown, Search } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import Cropper, { ReactCropperElement } from "react-cropper"
 import "cropperjs/dist/cropper.css"
 
-const DEFAULT_VARIANTS = [
-  "5 kg with Handle",
-  "5 kg without Handle",
-  "10 kg with Handle",
-  "10 kg without Handle",
-  "26 kg 2 Side Box",
-  "26 kg 1 Side",
-  "30 kg 2 Side Box",
-  "26 kg Fiber Non-Woven Bags",
-  "26 kg 3D Metallic Bags",
-  "50 kg Bags"
-]
+const SearchableVariantSelect = ({ 
+  value, 
+  onChange, 
+  options 
+}: { 
+  value: string; 
+  onChange: (val: string) => void; 
+  options: { _id: string, name: string }[] 
+}) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const [search, setSearch] = useState("");
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
+
+  const filteredOptions = options.filter(opt => opt.name.toLowerCase().includes(search.toLowerCase()));
+  const isLegacy = value && !options.some(opt => opt.name === value);
+
+  return (
+    <div className="relative w-full" ref={dropdownRef}>
+      <div 
+        className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
+        onClick={() => setIsOpen(!isOpen)}
+      >
+        <span className={value ? "text-foreground" : "text-muted-foreground"}>
+          {value ? (isLegacy ? `${value} (Legacy)` : value) : "Select a global variant..."}
+        </span>
+        <ChevronDown className="h-4 w-4 opacity-50" />
+      </div>
+
+      {isOpen && (
+        <div className="absolute z-50 w-full mt-1 rounded-md border bg-background text-foreground shadow-lg outline-none animate-in fade-in-80">
+          <div className="flex items-center border-b px-3">
+            <Search className="mr-2 h-4 w-4 shrink-0 opacity-50" />
+            <input
+              className="flex h-10 w-full rounded-md bg-transparent py-3 text-sm outline-none placeholder:text-muted-foreground"
+              placeholder="Search variants..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="max-h-60 overflow-y-auto p-1">
+            {filteredOptions.length === 0 ? (
+              <div className="py-6 text-center text-sm text-muted-foreground">No variant found.</div>
+            ) : (
+              filteredOptions.map((opt) => (
+                <div
+                  key={opt._id}
+                  className={`relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover:bg-muted ${value === opt.name ? 'bg-muted' : ''}`}
+                  onClick={() => {
+                    onChange(opt.name);
+                    setIsOpen(false);
+                    setSearch("");
+                  }}
+                >
+                  {opt.name}
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
 
 export default function BrandForm({ initialData = null }: { initialData?: any }) {
   const router = useRouter()
@@ -126,8 +188,24 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
   }, []);
   
   const [variants, setVariants] = useState<any[]>(
-    initialData?.variants || DEFAULT_VARIANTS.map(v => ({ name: v, isAvailable: true }))
+    initialData?.variants || []
   )
+  const [globalVariants, setGlobalVariants] = useState<any[]>([])
+
+  useEffect(() => {
+    fetch("/api/variants")
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setGlobalVariants(data);
+          // Pre-populate if we are creating a new brand
+          if (!initialData?.variants) {
+            setVariants(data.map((v: any) => ({ name: v.name, isAvailable: true })))
+          }
+        }
+      })
+      .catch(err => console.error("Failed to load global variants:", err))
+  }, [initialData])
 
   const handleVariantChange = (index: number, field: string, value: any) => {
     const newVariants = [...variants]
@@ -136,7 +214,14 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
   }
 
   const addVariant = () => {
-    setVariants([...variants, { name: "", isAvailable: true }])
+    // Pick the first global variant that isn't already added
+    const unusedVariant = globalVariants.find(gv => !variants.some(v => v.name.toLowerCase() === gv.name.toLowerCase()));
+    if (unusedVariant) {
+      setVariants([...variants, { name: unusedVariant.name, isAvailable: true }])
+    } else {
+      // If all are used, just add empty or don't add
+      setVariants([...variants, { name: "", isAvailable: true }])
+    }
   }
 
   const removeVariant = (index: number) => {
@@ -308,9 +393,11 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
         <div className="glass rounded-2xl p-6 md:p-8 space-y-6">
           <div className="flex justify-between items-center border-b pb-4">
             <h2 className="text-xl font-bold">Variants & Stock</h2>
-            <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-              <Plus className="mr-2 h-4 w-4" /> Add Variant
-            </Button>
+            {initialData && (
+              <Button type="button" variant="outline" size="sm" onClick={addVariant}>
+                <Plus className="mr-2 h-4 w-4" /> Add Variant
+              </Button>
+            )}
           </div>
 
           <div className="space-y-4">
@@ -318,11 +405,10 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
               <div key={index} className="flex flex-col md:flex-row gap-4 items-start md:items-center p-4 bg-muted/20 rounded-lg border">
                 <div className="flex-1 space-y-1 w-full">
                   <label className="text-xs text-muted-foreground">Variant Name</label>
-                  <Input 
-                    required
+                  <SearchableVariantSelect
                     value={variant.name}
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => handleVariantChange(index, "name", e.target.value)}
-                    placeholder="e.g. 5 kg with Handle"
+                    onChange={(val) => handleVariantChange(index, "name", val)}
+                    options={globalVariants}
                   />
                 </div>
                 <div className="w-full md:w-40 space-y-1">

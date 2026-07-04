@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState } from 'react';
-import styles from './VariantChips.module.css';
 
 interface VariantChipsProps {
   options: string[];
@@ -16,12 +15,38 @@ export default function VariantChips({ options, onSelect }: VariantChipsProps) {
     if (onSelect) onSelect(value);
   };
 
+  const containerStyle: React.CSSProperties = {
+    display: 'flex',
+    flexWrap: 'wrap',
+    gap: '0.5rem',
+    marginTop: '0.5rem',
+  };
+
+  const chipStyle: React.CSSProperties = {
+    border: '1px solid #d4af37',
+    borderRadius: '9999px',
+    padding: '0.25rem 0.75rem',
+    cursor: 'pointer',
+    fontSize: '0.875rem',
+    color: '#d4af37',
+    background: 'transparent',
+    transition: 'all 0.2s ease-in-out',
+    minWidth: '4rem',
+    textAlign: 'center',
+  };
+
+  const selectedStyle: React.CSSProperties = {
+    ...chipStyle,
+    background: 'linear-gradient(135deg, #d4af37, #b8860b)',
+    color: '#050505',
+  };
+
   return (
-    <div className={styles.container}>
+    <div style={containerStyle}>
       {options.map((opt) => (
         <div
           key={opt}
-          className={`${styles.chip} ${selected === opt ? styles.chipSelected : ''}`}
+          style={selected === opt ? selectedStyle : chipStyle}
           onClick={() => handleClick(opt)}
         >
           {opt}

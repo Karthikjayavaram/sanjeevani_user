@@ -64,7 +64,11 @@ export default function AdminLayout({
           </Link>
           <Link href="/admin/brands/new" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white">
             <Settings className="h-5 w-5 text-primary" />
-            <span className="font-medium">Add Stock</span>
+            <span className="font-medium">Add New Brand</span>
+          </Link>
+          <Link href="/admin/variants" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white">
+            <Settings className="h-5 w-5 text-primary" />
+            <span className="font-medium">Manage Variants</span>
           </Link>
           <Link href="/" onClick={closeMenu} className="flex items-center gap-3 px-4 py-3 rounded-xl hover:bg-white/5 transition-colors text-gray-300 hover:text-white mt-4 border-t border-white/10 pt-4">
             <Home className="h-5 w-5 text-primary" />

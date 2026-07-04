@@ -3,8 +3,20 @@ import { HeroSection } from "@/components/HomeClient"
 import BrandsClient from "@/components/BrandsClient"
 import connectToDatabase from "@/lib/db"
 import Brand from "@/models/Brand"
+import Variant from "@/models/Variant"
 
 export const dynamic = "force-dynamic"
+
+async function getGlobalVariants() {
+  if (!process.env.MONGODB_URI) return [];
+  try {
+    await connectToDatabase();
+    const variants = await Variant.find({}).sort({ order: 1, createdAt: 1 }).lean();
+    return variants.map((v: any) => v.name);
+  } catch (error) {
+    return [];
+  }
+}
 
 async function getBrands() {
   if (!process.env.MONGODB_URI) {
@@ -56,6 +68,7 @@ async function getBrands() {
 
 export default async function Home() {
   const brands = await getBrands();
+  const variants = await getGlobalVariants();
   const totalBags = brands.reduce((sum: number, b: any) => sum + b.totalStock, 0);
   const totalBrands = brands.length;
 
@@ -75,7 +88,7 @@ export default async function Home() {
           </div>
 
           <Suspense fallback={<div className="animate-pulse h-96 bg-muted/10 rounded-[2rem] border border-white/5"></div>}>
-            <BrandsClient initialBrands={brands} />
+            <BrandsClient initialBrands={brands} initialVariants={variants} />
           </Suspense>
         </div>
       </section>
