@@ -17,6 +17,13 @@ export async function DELETE(
       return NextResponse.json({ error: "Variant not found" }, { status: 404 });
     }
 
+    // Cascade delete: remove this variant from all brands
+    const Brand = (await import("@/models/Brand")).default;
+    await Brand.updateMany(
+      {},
+      { $pull: { variants: { name: variant.name } } }
+    );
+
     return NextResponse.json({ success: true, message: "Variant deleted" }, { status: 200 });
   } catch (error) {
     console.error("Failed to delete variant:", error);
