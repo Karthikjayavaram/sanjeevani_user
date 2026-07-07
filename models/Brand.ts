@@ -10,6 +10,12 @@ export interface IBrand extends Document {
   imageUrl?: string;
   originalImageUrl?: string;
   watermarkText?: string;
+  watermarkSize?: number;
+  watermarkX?: number;
+  watermarkY?: number;
+  watermarkRotation?: number;
+  watermarkOpacity?: number;
+  watermarkColor?: string;
   description: string;
   variants: IVariant[];
   totalStock: number;
@@ -28,6 +34,12 @@ const BrandSchema = new Schema<IBrand>(
     imageUrl: { type: String },
     originalImageUrl: { type: String },
     watermarkText: { type: String, default: "Sanjeevini" },
+    watermarkSize: { type: Number, default: 110 },
+    watermarkX: { type: Number, default: 50 },
+    watermarkY: { type: Number, default: 50 },
+    watermarkRotation: { type: Number, default: -65 },
+    watermarkOpacity: { type: Number, default: 100 },
+    watermarkColor: { type: String, default: "#ffffff" },
     description: { type: String },
     variants: [VariantSchema],
   },
