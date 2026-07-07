@@ -34,6 +34,24 @@ export async function PUT(
     await connectToDatabase();
     const body = await req.json();
 
+    // Check for Brand + Variant duplicates
+    if (body.variants && body.variants.length > 0) {
+      const existingBrands = await Brand.find({ 
+        name: { $regex: new RegExp(`^${body.name}$`, 'i') },
+        _id: { $ne: id }
+      });
+      for (const brand of existingBrands) {
+        for (const variant of body.variants) {
+          if (brand.variants.some((v: any) => v.name.toLowerCase() === variant.name.toLowerCase())) {
+            return NextResponse.json(
+              { error: "This brand with the selected variant already exists." }, 
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
+
     const updatedBrand = await Brand.findByIdAndUpdate(id, body, {
       new: true,
       runValidators: true,

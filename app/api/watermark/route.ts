@@ -10,28 +10,27 @@ cloudinary.config({
 
 export async function POST(req: Request) {
   try {
-    const data = await req.formData();
-    const file: File | null = data.get("file") as unknown as File;
-    const watermarkText = (data.get("watermarkText") as string) || "Sanjeevini";
+    const { originalUrl, watermarkText } = await req.json();
 
-    if (!file) {
-      return NextResponse.json({ error: "No file uploaded" }, { status: 400 });
+    if (!originalUrl) {
+      return NextResponse.json({ error: "No original URL provided" }, { status: 400 });
     }
 
-    const bytes = await file.arrayBuffer();
+    const text = watermarkText || "Sanjeevini";
+
+    // Fetch the original image buffer
+    const response = await fetch(originalUrl);
+    if (!response.ok) {
+      return NextResponse.json({ error: "Failed to fetch original image" }, { status: 500 });
+    }
+
+    const bytes = await response.arrayBuffer();
     const originalBuffer = Buffer.from(bytes);
-    
-    // Upload original to Cloudinary
-    const originalFileBase64 = `data:${file.type};base64,${originalBuffer.toString("base64")}`;
-    const originalUploadResponse = await cloudinary.uploader.upload(originalFileBase64, {
-      folder: "sanjeevani_uploads/originals",
-    });
 
     // Process with sharp
     const metadata = await sharp(originalBuffer).metadata();
     const width = metadata.width || 800;
     const height = metadata.height || 800;
-    // Calculate a reasonable font size (e.g., 10% of the smallest dimension, but bounded)
     const fontSize = Math.max(30, Math.floor(Math.min(width, height) * 0.15));
 
     const svgImage = `
@@ -45,7 +44,7 @@ export async function POST(req: Request) {
         text-shadow: 2px 2px 6px rgba(0,0,0,0.6); 
       }
       </style>
-      <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="title" transform="rotate(-45, ${width/2}, ${height/2})">${watermarkText}</text>
+      <text x="50%" y="50%" text-anchor="middle" dominant-baseline="middle" class="title" transform="rotate(-45, ${width/2}, ${height/2})">${text}</text>
     </svg>
     `;
 
@@ -61,11 +60,10 @@ export async function POST(req: Request) {
     });
     
     return NextResponse.json({ 
-      url: watermarkedUploadResponse.secure_url,
-      originalUrl: originalUploadResponse.secure_url
+      url: watermarkedUploadResponse.secure_url
     });
   } catch (e) {
-    console.error("Upload error:", e);
-    return NextResponse.json({ error: "Upload failed" }, { status: 500 });
+    console.error("Watermark generation error:", e);
+    return NextResponse.json({ error: "Watermark generation failed" }, { status: 500 });
   }
 }

@@ -15,13 +15,37 @@ export default function BrandsClient({ initialBrands, initialVariants }: { initi
   const normalize = (str: string) => str.replace(/\s+/g, "").toLowerCase();
 
   const filteredBrands = useMemo(() => {
-    return initialBrands.filter((brand) => {
+    const flattened: any[] = [];
+    
+    // Flatten brands so each variant is its own card
+    for (const brand of initialBrands) {
+      if (brand.variants && brand.variants.length > 0) {
+        for (const variant of brand.variants) {
+          flattened.push({
+            ...brand,
+            _id: `${brand._id}-${variant._id || variant.name}`,
+            originalBrandId: brand._id,
+            displayVariantName: variant.name,
+            totalStock: variant.isAvailable ? 1 : 0,
+            variants: [variant]
+          });
+        }
+      } else {
+        flattened.push({
+          ...brand,
+          displayVariantName: "No variant",
+          totalStock: 0,
+          variants: []
+        });
+      }
+    }
+
+    return flattened.filter((brand) => {
       const matchesSearch = brand.name.toLowerCase().includes(search.toLowerCase())
       if (!matchesSearch) return false;
 
       if (selectedVariant) {
-        // Compare normalized variant names
-        return brand.variants.some((v: any) => normalize(v.name) === normalize(selectedVariant));
+        return normalize(brand.displayVariantName) === normalize(selectedVariant);
       }
 
       return true;
@@ -118,52 +142,16 @@ export default function BrandsClient({ initialBrands, initialVariants }: { initi
                 </div>
                 
                 <div className="p-8 relative bg-gradient-to-t from-black/80 to-transparent">
-                  <h2 className="text-2xl font-playfair font-bold mb-3 text-white group-hover:text-primary transition-colors">{brand.name}</h2>
+                  <h2 className="text-2xl font-playfair font-bold mb-1 text-white group-hover:text-primary transition-colors">{brand.name}</h2>
+                  {brand.displayVariantName && brand.displayVariantName !== "No variant" && (
+                    <p className="text-lg text-primary/90 mb-4 font-medium">{brand.displayVariantName}</p>
+                  )}
                   
-                  <div className="flex justify-between items-center mb-6 pb-6 border-b border-white/10">
+                  <div className="flex justify-between items-center mt-2 pt-4 border-t border-white/10">
                     <span className="text-sm text-muted-foreground uppercase tracking-widest">Status</span>
                     <span className={`font-bold text-lg ${brand.totalStock > 0 ? "text-green-400" : "text-red-400"}`}>
                       {brand.totalStock > 0 ? "Available" : "Not Available"}
                     </span>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <h3 className="text-xs uppercase tracking-widest text-primary/80 mb-2">Variants</h3>
-                    {(() => {
-                      const allVariants = brand.variants;
-                      const isExpanded = expandedBrands[brand._id];
-                      const visibleVariants = isExpanded ? allVariants : allVariants.slice(0, 3);
-                      const hiddenCount = allVariants.length - 3;
-
-                      return (
-                        <>
-                          {allVariants.length === 0 ? (
-                            <div className="text-sm text-muted-foreground">No variants added.</div>
-                          ) : (
-                            <>
-                              {visibleVariants.map((v: any) => (
-                                <div key={v._id} className="flex justify-between text-sm">
-                                  <span className="text-gray-300">{v.name}</span>
-                                  {v.isAvailable ? (
-                                    <span className="text-green-400 font-medium">Available</span>
-                                  ) : (
-                                    <span className="text-red-400 font-medium">Unavailable</span>
-                                  )}
-                                </div>
-                              ))}
-                              {hiddenCount > 0 && (
-                                <button
-                                  onClick={() => setExpandedBrands((prev) => ({ ...prev, [brand._id]: !prev[brand._id] }))}
-                                  className="text-xs text-primary hover:text-primary/80 transition-colors pt-2 underline decoration-dashed underline-offset-4"
-                                >
-                                  {isExpanded ? "Show less" : `+ ${hiddenCount} more variant${hiddenCount !== 1 ? 's' : ''}`}
-                                </button>
-                              )}
-                            </>
-                          )}
-                        </>
-                      );
-                    })()}
                   </div>
                 </div>
               </div>

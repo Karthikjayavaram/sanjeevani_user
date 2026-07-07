@@ -8,6 +8,8 @@ export interface IVariant {
 export interface IBrand extends Document {
   name: string;
   imageUrl?: string;
+  originalImageUrl?: string;
+  watermarkText?: string;
   description: string;
   variants: IVariant[];
   totalStock: number;
@@ -22,8 +24,10 @@ const VariantSchema = new Schema<IVariant>({
 
 const BrandSchema = new Schema<IBrand>(
   {
-    name: { type: String, required: true, unique: true },
+    name: { type: String, required: true },
     imageUrl: { type: String },
+    originalImageUrl: { type: String },
+    watermarkText: { type: String, default: "Sanjeevini" },
     description: { type: String },
     variants: [VariantSchema],
   },

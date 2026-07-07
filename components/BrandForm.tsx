@@ -9,13 +9,11 @@ import { Input } from "@/components/ui/input"
 import Cropper, { ReactCropperElement } from "react-cropper"
 import "cropperjs/dist/cropper.css"
 
-const SearchableVariantSelect = ({ 
-  value, 
-  onChange, 
+const VariantAdder = ({ 
+  onSelect, 
   options 
 }: { 
-  value: string; 
-  onChange: (val: string) => void; 
+  onSelect: (val: string) => void; 
   options: { _id: string, name: string }[] 
 }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -33,7 +31,6 @@ const SearchableVariantSelect = ({
   }, []);
 
   const filteredOptions = options.filter(opt => opt.name.toLowerCase().includes(search.toLowerCase()));
-  const isLegacy = value && !options.some(opt => opt.name === value);
 
   return (
     <div className="relative w-full" ref={dropdownRef}>
@@ -41,9 +38,7 @@ const SearchableVariantSelect = ({
         className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring cursor-pointer"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <span className={value ? "text-foreground" : "text-muted-foreground"}>
-          {value ? (isLegacy ? `${value} (Legacy)` : value) : "Select a global variant..."}
-        </span>
+        <span className="text-muted-foreground">Search Variant...</span>
         <ChevronDown className="h-4 w-4 opacity-50" />
       </div>
 
@@ -66,9 +61,9 @@ const SearchableVariantSelect = ({
               filteredOptions.map((opt) => (
                 <div
                   key={opt._id}
-                  className={`relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover:bg-muted ${value === opt.name ? 'bg-muted' : ''}`}
+                  className="relative flex w-full cursor-pointer select-none items-center rounded-sm py-2 px-2 text-sm outline-none hover:bg-muted"
                   onClick={() => {
-                    onChange(opt.name);
+                    onSelect(opt.name);
                     setIsOpen(false);
                     setSearch("");
                   }}
@@ -198,10 +193,6 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
       .then(data => {
         if (Array.isArray(data)) {
           setGlobalVariants(data);
-          // Pre-populate if we are creating a new brand
-          if (!initialData?.variants) {
-            setVariants(data.map((v: any) => ({ name: v.name, isAvailable: true })))
-          }
         }
       })
       .catch(err => console.error("Failed to load global variants:", err))
@@ -213,14 +204,9 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
     setVariants(newVariants)
   }
 
-  const addVariant = () => {
-    // Pick the first global variant that isn't already added
-    const unusedVariant = globalVariants.find(gv => !variants.some(v => v.name.toLowerCase() === gv.name.toLowerCase()));
-    if (unusedVariant) {
-      setVariants([...variants, { name: unusedVariant.name, isAvailable: true }])
-    } else {
-      // If all are used, just add empty or don't add
-      setVariants([...variants, { name: "", isAvailable: true }])
+  const handleAddSelectedVariant = (name: string) => {
+    if (!variants.some(v => v.name.toLowerCase() === name.toLowerCase())) {
+      setVariants([...variants, { name, isAvailable: true }]);
     }
   }
 
@@ -391,46 +377,39 @@ export default function BrandForm({ initialData = null }: { initialData?: any })
         </div>
 
         <div className="glass rounded-2xl p-6 md:p-8 space-y-6">
-          <div className="flex justify-between items-center border-b pb-4">
-            <h2 className="text-xl font-bold">Variants & Stock</h2>
-            {initialData && (
-              <Button type="button" variant="outline" size="sm" onClick={addVariant}>
-                <Plus className="mr-2 h-4 w-4" /> Add Variant
-              </Button>
-            )}
+          <div className="border-b pb-4">
+            <h2 className="text-xl font-bold mb-4">Variants</h2>
+            <VariantAdder 
+              onSelect={handleAddSelectedVariant} 
+              options={globalVariants.filter(gv => !variants.some(v => v.name.toLowerCase() === gv.name.toLowerCase()))}
+            />
           </div>
 
           <div className="space-y-4">
             {variants.map((variant, index) => (
               <div key={index} className="flex flex-col md:flex-row gap-4 items-start md:items-center p-4 bg-muted/20 rounded-lg border">
-                <div className="flex-1 space-y-1 w-full">
-                  <label className="text-xs text-muted-foreground">Variant Name</label>
-                  <SearchableVariantSelect
-                    value={variant.name}
-                    onChange={(val) => handleVariantChange(index, "name", val)}
-                    options={globalVariants}
-                  />
+                <div className="flex-1 w-full">
+                  <div className="font-medium text-base">{variant.name}</div>
                 </div>
-                <div className="w-full md:w-40 space-y-1">
-                  <label className="text-xs text-muted-foreground">Status</label>
+                <div className="w-full md:w-48 space-y-1">
+                  <label className="text-xs text-muted-foreground">Stock Status</label>
                   <select
                     className="flex h-10 w-full rounded-md border border-input bg-transparent px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
                     value={variant.isAvailable ? "available" : "unavailable"}
                     onChange={(e: React.ChangeEvent<HTMLSelectElement>) => handleVariantChange(index, "isAvailable", e.target.value === "available")}
                   >
-                    <option value="available" className="bg-background text-foreground">Available</option>
-                    <option value="unavailable" className="bg-background text-foreground">Unavailable</option>
+                    <option value="available" className="bg-background text-foreground">In Stock</option>
+                    <option value="unavailable" className="bg-background text-foreground">Out of Stock</option>
                   </select>
                 </div>
-                <div className="pt-5 flex justify-end w-full md:w-auto">
+                <div className="pt-0 md:pt-5 flex justify-end w-full md:w-auto">
                   <Button 
                     type="button" 
                     variant="ghost" 
-                    size="icon" 
-                    className="text-destructive"
+                    className="text-destructive hover:bg-destructive/10 hover:text-destructive"
                     onClick={() => removeVariant(index)}
                   >
-                    <Trash2 className="h-5 w-5" />
+                    Remove
                   </Button>
                 </div>
               </div>

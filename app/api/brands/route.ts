@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import connectToDatabase from "@/lib/db";
 import Brand from "@/models/Brand";
+import mongoose from "mongoose";
 
 export async function GET(req: Request) {
   try {
@@ -36,7 +37,30 @@ export async function GET(req: Request) {
 export async function POST(req: Request) {
   try {
     await connectToDatabase();
+    
+    // Safely attempt to drop the old unique index
+    try {
+      await mongoose.connection.collection('brands').dropIndex('name_1');
+    } catch (e) {
+      // Ignore error if index doesn't exist
+    }
+
     const body = await req.json();
+
+    // Check for Brand + Variant duplicates
+    if (body.variants && body.variants.length > 0) {
+      const existingBrands = await Brand.find({ name: { $regex: new RegExp(`^${body.name}$`, 'i') } });
+      for (const brand of existingBrands) {
+        for (const variant of body.variants) {
+          if (brand.variants.some((v: any) => v.name.toLowerCase() === variant.name.toLowerCase())) {
+            return NextResponse.json(
+              { error: "This brand with the selected variant already exists." }, 
+              { status: 400 }
+            );
+          }
+        }
+      }
+    }
 
     const newBrand = await Brand.create(body);
 
