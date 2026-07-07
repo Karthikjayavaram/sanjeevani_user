@@ -54,7 +54,7 @@ const VariantAdder = ({
               autoFocus
             />
           </div>
-          <div className="max-h-60 overflow-y-auto p-1">
+          <div className="max-h-60 overflow-y-auto p-1" data-lenis-prevent="true">
             {filteredOptions.length === 0 ? (
               <div className="py-6 text-center text-sm text-muted-foreground">No variant found.</div>
             ) : (
